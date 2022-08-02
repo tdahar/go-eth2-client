@@ -54,7 +54,7 @@ func (s *Service) BeaconBlockProposal(ctx context.Context, slot phase0.Slot, ran
 // beaconBlockProposalV2 fetches a proposed beacon block for signing.
 func (s *Service) beaconBlockProposalV2(ctx context.Context, slot phase0.Slot, randaoReveal phase0.BLSSignature, graffiti []byte) (*spec.VersionedBeaconBlock, error) {
 
-	url := fmt.Sprintf("/eth/v2/validator/blocks/%d?randao_reveal=%#x&graffiti=%#x", slot, randaoReveal, graffiti)
+	url := fmt.Sprintf("/eth/v2/validator/blocks/%d?randao_reveal=%#x&graffiti=%#x&verify_randao=false", slot, randaoReveal, graffiti)
 	respBodyReader, err := s.get(ctx, url)
 	if err != nil {
 		log.Trace().Str("url", url).Err(err).Msg("Request failed")
