@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/attestantio/go-eth2-client/spec"
 	"github.com/attestantio/go-eth2-client/spec/altair"
@@ -52,10 +53,14 @@ func (s *Service) BeaconBlockProposal(ctx context.Context, slot phase0.Slot, ran
 }
 
 // beaconBlockProposalV2 fetches a proposed beacon block for signing.
-func (s *Service) beaconBlockProposalV2(ctx context.Context, slot phase0.Slot, randaoReveal phase0.BLSSignature, graffiti []byte) (*spec.VersionedBeaconBlock, error) {
-
-	url := fmt.Sprintf("/eth/v2/validator/blocks/%d?randao_reveal=%#x&graffiti=%#x&verify_randao=false", slot, randaoReveal, graffiti)
+func (s *Service) beaconBlockProposalV2(ctx context.Context, slot phase0.Slot, randaoReveal phase0.BLSSignature, graffiti []byte, randaoCheck ...bool) (*spec.VersionedBeaconBlock, error) {
+	url := fmt.Sprintf("/eth/v2/validator/blocks/%d?randao_reveal=%#x&graffiti=%#x", slot, randaoReveal, graffiti)
+	if strings.Contains(s.address, "5052") {
+		url = fmt.Sprintf("/eth/v2/validator/blocks/%d?verify_randao=false&graffiti=%#x", slot, graffiti)
+	}
+	// snapshot := time.Now()
 	respBodyReader, err := s.get(ctx, url)
+	// fmt.Printf("Requested block from: %s, Timestamp: %s, Duration: %f\n", s.address, snapshot.String(), time.Since(snapshot).Seconds())
 	if err != nil {
 		log.Trace().Str("url", url).Err(err).Msg("Request failed")
 		return nil, errors.Wrap(err, "failed to request beacon block proposal")
