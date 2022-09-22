@@ -57,7 +57,6 @@ func (s *Service) BeaconBlockProposal(ctx context.Context, slot phase0.Slot, ran
 func (s *Service) beaconBlockProposalV2(ctx context.Context, slot phase0.Slot, randaoReveal phase0.BLSSignature, graffiti []byte, randaoCheck ...bool) (*spec.VersionedBeaconBlock, error) {
 
 	url := fmt.Sprintf("/eth/v2/validator/blocks/%d?randao_reveal=%#x&graffiti=%#x", slot, randaoReveal, graffiti)
-	fmt.Println(url)
 	if strings.Contains(s.address, "5052") {
 		url = fmt.Sprintf("/eth/v2/validator/blocks/%d?verify_randao=false&graffiti=%#x", slot, graffiti)
 	}
