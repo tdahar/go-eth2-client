@@ -57,10 +57,8 @@ func (s *Service) BeaconBlockProposal(ctx context.Context, slot phase0.Slot, ran
 func (s *Service) beaconBlockProposalV2(ctx context.Context, slot phase0.Slot, randaoReveal phase0.BLSSignature, graffiti []byte, randaoCheck ...bool) (*spec.VersionedBeaconBlock, error) {
 
 	url := fmt.Sprintf("/eth/v2/validator/blocks/%d?randao_reveal=%#x&graffiti=%#x", slot, randaoReveal, graffiti)
-	if strings.Contains(s.address, "5052") {
-		url = fmt.Sprintf("/eth/v2/validator/blocks/%d?verify_randao=false&graffiti=%#x", slot, graffiti)
-	}
-	if strings.Contains(s.address, "5053") {
+
+	if strings.Contains(s.address, "5052") || strings.Contains(s.address, "5053") {
 		bs, err := hex.DecodeString("c00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to build infinity randaoReveal")
@@ -68,6 +66,10 @@ func (s *Service) beaconBlockProposalV2(ctx context.Context, slot phase0.Slot, r
 		copy(randaoReveal[:], bs)
 		url = fmt.Sprintf("/eth/v2/validator/blocks/%d?randao_reveal=%#x&skip_randao_verification", slot, randaoReveal)
 	}
+	if strings.Contains(s.address, "9596") {
+		url = fmt.Sprintf("/eth/v2/validator/blocks/%d?randao_reveal=%#x&skip_randao_verification", slot, randaoReveal)
+	}
+
 	// snapshot := time.Now()
 	respBodyReader, err := s.get(ctx, url)
 	// fmt.Printf("Requested block from: %s, Timestamp: %s, Duration: %f\n", s.address, snapshot.String(), time.Since(snapshot).Seconds())
